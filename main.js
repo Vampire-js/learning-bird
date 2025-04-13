@@ -7,7 +7,7 @@ class Pipe {
   constructor() {
     this.w = 100;
     this.h = 600;
-    this.x = canvas.width-200;
+    this.x = canvas.width/2 - 100;
     this.y = 300 + 200 * Math.random();
   }
   draw() {
@@ -21,6 +21,13 @@ class Pipe {
 }
 
 let pipes = [];
+let topEdge = new Pipe()
+topEdge.w = canvas.width
+topEdge.h = 10
+topEdge.x = 0
+topEdge.y = 10
+
+pipes.push(topEdge)
 let pipesInterval;
 
 function startPipeSpawning() {
@@ -41,7 +48,7 @@ class Player {
     c.fillRect(this.position.x, this.position.y, this.w, this.h);
   }
   move() {
-    this.velocity.y = -2;
+    this.velocity.y = -1;
   }
   reset(){
     this.position = { x: 80, y: canvas.height / 2 };
@@ -88,7 +95,7 @@ function GameState() {
     nextPipe.x = canvas.width;
   }
   return [
-    player.position.y / canvas.height,
+    (player.position.y + player.h/2) / canvas.height,
     player.velocity.y,
     nextPipe.x / canvas.width,
     nextPipe.y / canvas.height
@@ -97,7 +104,7 @@ function GameState() {
 
 const model = tf.sequential();
 model.add(tf.layers.dense({ inputShape: [4], units: 16, activation: 'relu' }));
-model.add(tf.layers.dense({ units: 4, activation: 'relu' }));
+model.add(tf.layers.dense({ units: 16, activation: 'sigmoid' }));
 model.add(tf.layers.dense({ units: 2 }));
 model.compile({ optimizer: tf.train.adam(0.001), loss: 'meanSquaredError' });
 
@@ -123,7 +130,7 @@ async function train(state, action, reward, nextState, done, gamma = 0.9) {
   tf.dispose([stateTensor, nextStateTensor, qValues, nextQ, targetTensor]);
 }
 
-let epsilon = .2;
+let epsilon = .4;
 const epsilonDecay = 0.995;
 const epsilonMin = 0.1;
 let episode = 0;
@@ -155,6 +162,7 @@ async function logicLoop() {
 
 
 function animate() {
+  
   c.fillStyle = "skyblue";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
