@@ -4,18 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Vite App</title>
   </head>
   <body>
     <style>
       *{
-        padding: 0;
-        margin: 0;
+        /* padding: 0; */
+        /* margin: 0; */
         overflow: hidden;
       }
     </style>
     <canvas id="canvas"></canvas>
-    
+    <div class="overlay absolute top-0 left-0 w-screen h-screen">
+      <h2 id="iter" class="text-4xl m-10 font-black text-slate-800">Iteration:</h2>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
     <script type="module" src="/main.js"></script>
   </body>

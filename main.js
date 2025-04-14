@@ -15,7 +15,7 @@ class Pipe {
     c.fillRect(this.x, this.y, this.w, this.h);
   }
   update() {
-    this.x -= 1;
+    this.x -= 3;
     this.draw();
   }
 }
@@ -33,7 +33,7 @@ let pipesInterval;
 function startPipeSpawning() {
   pipesInterval = setInterval(() => {
     pipes.push(new Pipe());
-  }, 800);
+  }, 1000);
 }
 
 class Player {
@@ -89,16 +89,20 @@ function GameOver() {
 }
 
 function GameState() {
-  let nextPipe = pipes.find(p => p.x + p.w > player.position.x);
+  let nextPipe = pipes.find(p => p.x < player.position.x + player.w + 100);
   if (!nextPipe) {
     nextPipe = new Pipe();
     nextPipe.x = canvas.width;
   }
+  const pipeCenterY = nextPipe.y - 100;
+  const playerCenterY = player.position.y + player.h / 2;
+  const dy = (playerCenterY - pipeCenterY) / canvas.height;
+  
   return [
-    (player.position.y + player.h/2) / canvas.height,
+    (playerCenterY )/ canvas.height,
     player.velocity.y,
-    nextPipe.x / canvas.width,
-    nextPipe.y / canvas.height
+    (nextPipe.x - player.position.x) / canvas.width,
+    dy
   ];
 }
 
@@ -134,6 +138,7 @@ let epsilon = .4;
 const epsilonDecay = 0.995;
 const epsilonMin = 0.1;
 let episode = 0;
+document.getElementById("iter").innerHTML = `Iteration: ${episode}`
 
 
 async function logicLoop() {
@@ -153,7 +158,7 @@ async function logicLoop() {
 
     if (done) {
       episode++
-      console.log(episode)
+      document.getElementById("iter").innerHTML = `Iteration: ${episode}`
       resetGame();
     }
  }
