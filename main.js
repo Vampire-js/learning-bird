@@ -3,6 +3,9 @@ const c = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+let score = 0
+let best = 0
+
 class Pipe {
   constructor() {
     this.w = 100;
@@ -33,6 +36,7 @@ let pipesInterval;
 function startPipeSpawning() {
   pipesInterval = setInterval(() => {
     pipes.push(new Pipe());
+    score++
   }, 1000);
 }
 
@@ -65,6 +69,7 @@ class Player {
 let player = new Player();
 
 function resetGame() {
+  score = 0
   player.reset()
   pipes = [];
   clearInterval(pipesInterval);
@@ -89,7 +94,7 @@ function GameOver() {
 }
 
 function GameState() {
-  let nextPipe = pipes.find(p => p.x < player.position.x + player.w + 100);
+  let nextPipe = pipes.find(p => p.x < player.position.x + player.w);
   if (!nextPipe) {
     nextPipe = new Pipe();
     nextPipe.x = canvas.width;
@@ -128,7 +133,7 @@ async function train(state, action, reward, nextState, done, gamma = 0.9) {
   const qData = await qValues.data();
   const nextQData = await nextQ.data();
   let target = [...qData];
-  target[action] = reward + (done ? 0 : gamma * Math.max(...nextQData));
+  target[action] = reward /*+ (done ? 0 : gamma * Math.max(...nextQData))*/;
   const targetTensor = tf.tensor2d([target]);
   await model.fit(stateTensor, targetTensor, { epochs: 1, verbose: 0 });
   tf.dispose([stateTensor, nextStateTensor, qValues, nextQ, targetTensor]);
@@ -139,16 +144,21 @@ const epsilonDecay = 0.995;
 const epsilonMin = 0.1;
 let episode = 0;
 document.getElementById("iter").innerHTML = `Iteration: ${episode}`
+document.getElementById("score").innerHTML = `Score: ${score}`
 
 
 async function logicLoop() {
   while (true) {
     const state = GameState();
     const action = await chooseAction(state, epsilon);
+document.getElementById("score").innerHTML = `Score: ${score}`
+best = Math.max(best, score)
+document.getElementById("best").innerHTML = `Best Score: ${best}`
+
     
     if (action === 1) player.move();
 
-    const reward = GameOver() ? -1 : 1;
+    const reward = GameOver() ? 0 : 1;
     const nextState = GameState();
     const done = GameOver();
 
